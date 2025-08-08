@@ -26,7 +26,16 @@ exports.createListing = async (req, res) => {
       return res.status(400).json({ message: 'Missing required listing fields' });
     }
     // Map uploaded files to objects containing URL and key
-    const images = (req.files || []).map((file) => ({ url: file.location, key: file.key }));
+    // When using Cloudinary via multer-storage-cloudinary, the file object
+    // exposes a `path` property with the uploaded image URL and a `filename`
+    // property representing the public ID. These differ from the `location` and
+    // `key` fields returned by AWS S3.  Here we map each file to match the
+    // Listing schema by storing the Cloudinary URL in `url` and the filename
+    // as `key` for future reference.
+    const images = (req.files || []).map((file) => ({
+      url: file.path,
+      key: file.filename,
+    }));
     const listing = new Listing({
       title,
       make,
@@ -182,7 +191,10 @@ exports.updateListing = async (req, res) => {
     });
     // If new images uploaded, replace the images array
     if (req.files && req.files.length > 0) {
-      listing.images = req.files.map((file) => ({ url: file.location, key: file.key }));
+      listing.images = req.files.map((file) => ({
+        url: file.path,
+        key: file.filename,
+      }));
     }
     // If seller updating, reset status to Pending
     if (isSeller && !isAdmin) {
