@@ -61,7 +61,11 @@ const CreateListing = () => {
     { name: 'Red', value: '#b91c1c' },
     { name: 'Green', value: '#065f46' },
     { name: 'Yellow', value: '#ca8a04' },
+    // The "Other" option allows the user to pick a custom colour via a colour picker
+    { name: 'Other', value: null, custom: true },
   ];
+  // Show colour picker for custom colours
+  const [showColourPicker, setShowColourPicker] = useState(false);
   const bodyOptions = [
     { name: 'Sedan', icon: '🚗' },
     { name: 'SUV', icon: '🚙' },
@@ -83,6 +87,11 @@ const CreateListing = () => {
   const makes = Object.keys(carData);
   const models = form.make ? Object.keys(carData[form.make]) : [];
   const years = form.make && form.model ? carData[form.make][form.model] : [];
+
+  // Determine whether the currently selected colour is custom (i.e. not one
+  // of the predefined swatches).  This is used to highlight the "Other"
+  // option when a custom colour is chosen.
+  const isCustomColour = form.color && !colourOptions.some((c) => !c.custom && c.value === form.color);
   const [images, setImages] = useState([]);
   const [error, setError] = useState('');
 
@@ -128,14 +137,28 @@ const CreateListing = () => {
   const handleTransmissionChange = (value) => {
     setForm({ ...form, transmission: value });
   };
-  const handleColourChange = (value) => {
-    setForm({ ...form, color: value });
+  const handleColourChange = (value, isCustom = false) => {
+    if (isCustom) {
+      // Show the colour picker for custom colours
+      setShowColourPicker(true);
+    } else {
+      // Hide the picker and set the selected colour
+      setShowColourPicker(false);
+      setForm({ ...form, color: value });
+    }
   };
   const handleBodyTypeChange = (value) => {
     setForm({ ...form, bodyType: value });
   };
   const handleCityChange = (e) => {
     setForm({ ...form, location: e.target.value });
+  };
+
+  // When the user picks a custom colour from the colour picker, update the
+  // form state directly.
+  const handleCustomColourChange = (e) => {
+    const val = e.target.value;
+    setForm({ ...form, color: val });
   };
 
   const handleImageChange = (e) => {
@@ -287,19 +310,42 @@ const CreateListing = () => {
         <div className="flex flex-col">
           <span className="text-sm mb-1">{t('color') || 'Colour'}</span>
           <div className="flex gap-2 flex-wrap">
-            {colourOptions.map((col) => (
-              <button
-                key={col.name}
-                type="button"
-                className={`w-8 h-8 rounded-full border ${form.color === col.value ? 'ring-2 ring-primary' : ''}`}
-                style={{ backgroundColor: col.value }}
-                onClick={() => handleColourChange(col.value)}
-                title={col.name}
-              >
-                {/* empty content; colour represented by background */}
-              </button>
-            ))}
+            {colourOptions.map((col) => {
+              if (col.custom) {
+                return (
+                  <button
+                    key={col.name}
+                    type="button"
+                    className={`w-8 h-8 flex items-center justify-center rounded-full border ${isCustomColour || showColourPicker ? 'ring-2 ring-primary' : ''}`}
+                    onClick={() => handleColourChange(null, true)}
+                    title={col.name}
+                  >
+                    🎨
+                  </button>
+                );
+              }
+              return (
+                <button
+                  key={col.name}
+                  type="button"
+                  className={`w-8 h-8 rounded-full border ${form.color === col.value ? 'ring-2 ring-primary' : ''}`}
+                  style={{ backgroundColor: col.value }}
+                  onClick={() => handleColourChange(col.value)}
+                  title={col.name}
+                />
+              );
+            })}
           </div>
+          {showColourPicker && (
+            <div className="mt-2">
+              <input
+                type="color"
+                value={form.color || '#ffffff'}
+                onChange={handleCustomColourChange}
+                className="w-16 h-8 border rounded p-0"
+              />
+            </div>
+          )}
         </div>
 
         {/* Body Type */}
