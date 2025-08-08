@@ -438,12 +438,14 @@ const CreateListing = () => {
         {/* Price */}
         <div className="flex items-center">
           <input
+            type="number"
             name="price"
             placeholder={t('price') || 'Price'}
             value={form.price}
             onChange={handlePriceChange}
             className="flex-1 border rounded px-3 py-2"
             required
+            min="0"
           />
           <span className="ml-2 whitespace-nowrap">AED</span>
         </div>
@@ -451,12 +453,14 @@ const CreateListing = () => {
         {/* Mileage */}
         <div className="flex items-center">
           <input
+            type="number"
             name="mileage"
             placeholder={t('mileage') || 'Mileage'}
             value={form.mileage}
             onChange={handleMileageChange}
             className="flex-1 border rounded px-3 py-2"
             required
+            min="0"
           />
           <span className="ml-2 whitespace-nowrap">km</span>
         </div>
