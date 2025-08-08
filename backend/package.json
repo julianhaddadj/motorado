@@ -19,9 +19,12 @@
   "author": "Motorado Team",
   "license": "MIT",
   "dependencies": {
-    "aws-sdk": "^2.1462.0",
     "bcryptjs": "^2.4.3",
+<<<<<<< HEAD
     "cloudinary": "^1.41.3",
+=======
+    "cloudinary": "^1.39.2",
+>>>>>>> f24b229e8315638fd5ee29f27199a3180489ec8e
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.19.2",
@@ -29,7 +32,10 @@
     "mongoose": "^8.3.2",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
+<<<<<<< HEAD
     "multer-s3": "^2.10.0",
+=======
+>>>>>>> f24b229e8315638fd5ee29f27199a3180489ec8e
     "multer-storage-cloudinary": "^4.0.0"
   },
   "devDependencies": {
