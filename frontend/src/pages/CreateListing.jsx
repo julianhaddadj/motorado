@@ -50,13 +50,7 @@ const CreateListing = () => {
 
   // Predefined options for mileage ranges, engines, transmissions, colours,
   // body types and cities.  These arrays drive the dropdowns and selectors.
-  const mileageOptions = [
-    '0 - 50,000 km',
-    '50,001 - 100,000 km',
-    '100,001 - 150,000 km',
-    '150,001 - 200,000 km',
-    '200,001+ km',
-  ];
+  // Note: mileage is now a numeric input; we no longer use predefined ranges.
   const engineOptions = ['Petrol', 'Electric', 'Diesel'];
   const transmissionOptions = ['Automatic', 'Manual'];
   const colourOptions = [
@@ -120,8 +114,13 @@ const CreateListing = () => {
     setForm({ ...form, year: e.target.value });
   };
 
+  // Ensure mileage only accepts numbers.  Empty string is allowed so the field
+  // can be cleared.  Non‑digit characters are ignored.
   const handleMileageChange = (e) => {
-    setForm({ ...form, mileage: e.target.value });
+    const value = e.target.value;
+    if (value === '' || /^\d+$/.test(value)) {
+      setForm({ ...form, mileage: value });
+    }
   };
   const handleEngineChange = (e) => {
     setForm({ ...form, engine: e.target.value });
@@ -222,28 +221,30 @@ const CreateListing = () => {
         </select>
 
         {/* Price */}
-        <input
-          name="price"
-          placeholder={t('price') || 'Price'}
-          value={form.price}
-          onChange={handlePriceChange}
-          className="border rounded px-3 py-2"
-          required
-        />
+        <div className="flex items-center">
+          <input
+            name="price"
+            placeholder={t('price') || 'Price'}
+            value={form.price}
+            onChange={handlePriceChange}
+            className="flex-1 border rounded px-3 py-2"
+            required
+          />
+          <span className="ml-2 whitespace-nowrap">AED</span>
+        </div>
 
         {/* Mileage */}
-        <select
-          name="mileage"
-          value={form.mileage}
-          onChange={handleMileageChange}
-          className="border rounded px-3 py-2"
-          required
-        >
-          <option value="">{t('mileage') || 'Mileage'}</option>
-          {mileageOptions.map((range) => (
-            <option key={range} value={range}>{range}</option>
-          ))}
-        </select>
+        <div className="flex items-center">
+          <input
+            name="mileage"
+            placeholder={t('mileage') || 'Mileage'}
+            value={form.mileage}
+            onChange={handleMileageChange}
+            className="flex-1 border rounded px-3 py-2"
+            required
+          />
+          <span className="ml-2 whitespace-nowrap">km</span>
+        </div>
 
         {/* Engine */}
         <div className="flex flex-col">
