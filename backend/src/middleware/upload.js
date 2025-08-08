@@ -1,15 +1,15 @@
 const multer = require('multer');
-const multerS3 = require('multer-s3');
-const aws = require('aws-sdk');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('cloudinary').v2;
 
-// Configure AWS credentials
-const s3 = new aws.S3({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  region: process.env.AWS_REGION,
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// File filter to accept only image types (jpeg, jpg, png)
+// File filter (only jpeg, jpg, png)
 const fileFilter = (req, file, cb) => {
   const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
   if (allowedTypes.includes(file.mimetype)) {
@@ -19,28 +19,20 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-/**
- * Multer upload middleware using S3 for storage. Images are uploaded directly
- * to the configured S3 bucket under the `listings/` prefix. Uploaded files
- * will receive unique keys based on the current timestamp and original file
- * name to avoid collisions.
- */
+// Multer storage for Cloudinary
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'listings',
+    allowed_formats: ['jpg', 'jpeg', 'png'],
+    transformation: [{ width: 1024, height: 768, crop: 'limit' }],
+  },
+});
+
 const upload = multer({
+  storage,
   fileFilter,
-  storage: multerS3({
-    s3,
-    bucket: process.env.S3_BUCKET_NAME,
-    acl: 'public-read',
-    metadata: (req, file, cb) => {
-      cb(null, { fieldName: file.fieldname });
-    },
-    key: (req, file, cb) => {
-      const ext = file.mimetype.split('/')[1];
-      const filename = `${Date.now()}-${file.originalname.replace(/\s+/g, '-')}`;
-      cb(null, `listings/${filename}`);
-    },
-  }),
-  limits: { fileSize: 5 * 1024 * 1024 }, // limit 5MB per file
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
 });
 
 module.exports = upload;
